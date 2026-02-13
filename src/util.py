@@ -33,16 +33,6 @@ def data_transform_chbmit(x, mu=255):
     return div_100_staged_mu_law(signal.resample(x, 2000, axis=1))
 
 def data_transform_chbmit_filt(x, mu=255):
-    return div_100_staged_mu_law(
-        mne.filter.notch_filter(
-            mne.filter.filter_data(
-                signal.resample(x, 2000, axis=1)
-                , 200, 0.5, 75
-            ),
-        200, 60)
-    )
-
-def data_transform_chbmit_filt(x, mu=255):
     resampled = signal.resample(x, 2000, axis=1).astype(np.float64)
     return div_100_staged_mu_law(
         mne.filter.notch_filter(
