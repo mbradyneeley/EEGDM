@@ -1,0 +1,47 @@
+# Unified CHB-MIT Preprocessing Configuration
+# Uses the new unified preprocessing script with official EEGDM transforms
+
+input_files:
+  # For CHB-MIT data - all patients currently in test directory
+  root: "/home/sagemaker-user/eeg_processing_pipeline/EEGDM-main/data/chbmit/processed_seg/test"
+  train_dir: ""
+  test_dir: ""
+  val_dir: ""
+
+output_files:
+  root: "./data/unified_chbmit"
+  train_dir: "train"
+  test_dir: "test" 
+  val_dir: "val"
+
+# Preprocessing settings for unified script
+preprocessing:
+  data_type: "chbmit"
+  sampling_rate: 256
+  segment_length: 10  # seconds
+  
+  # Train/val split for CHB-MIT patients
+  train_patients: ["chb01", "chb02", "chb03", "chb04", "chb05", "chb06", "chb07", 
+                   "chb08", "chb09", "chb10", "chb11", "chb12", "chb13", "chb14",
+                   "chb15", "chb16", "chb17", "chb18", "chb19", "chb20"]
+  val_patients: ["chb21", "chb22"]  
+  test_patients: ["chb23", "chb24"]
+
+# Data loading configuration (uses EEGDM transforms)
+data_loading:
+  schema:
+    - _target_: dataloader.TUEVDataset.TUEVDataField
+      _args_:
+        - "X"
+        - _target_: src.util.dynamic_load
+          item: torch.float
+        - _target_: src.util.dynamic_load
+          item: src.util.data_transform_chbmit_filt  # Official EEGDM transform
+    - _target_: dataloader.TUEVDataset.TUEVDataField
+      _args_:
+        - "y"
+        - _target_: src.util.dynamic_load
+          item: torch.long
+  
+  batch_size: 16
+  num_workers: 4

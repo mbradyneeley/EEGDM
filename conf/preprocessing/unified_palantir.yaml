@@ -1,0 +1,44 @@
+# Unified Palantir EDF Preprocessing Configuration
+# Uses the new unified preprocessing script with official EEGDM transforms
+
+input_files:
+  # For Palantir EDF files
+  root: "/home/sagemaker-user/eeg_processing_pipeline/eeg_data/eeg_bootcamp_palantir"
+  # Single directory since Palantir data doesn't have train/test split
+
+output_files:
+  root: "./data/unified_palantir"
+  train_dir: "train"
+  test_dir: "test"
+  val_dir: "val"
+
+# Preprocessing settings for unified script
+preprocessing:
+  data_type: "palantir"
+  sampling_rate: 256  # Adjust based on actual Palantir sampling rate
+  segment_length: 10  # seconds
+  
+  # Split ratios for Palantir data (no predefined patient splits)
+  train_ratio: 0.7
+  val_ratio: 0.15
+  test_ratio: 0.15
+  random_seed: 42
+
+# Data loading configuration (uses EEGDM transforms)
+data_loading:
+  schema:
+    - _target_: dataloader.TUEVDataset.TUEVDataField
+      _args_:
+        - "X"
+        - _target_: src.util.dynamic_load
+          item: torch.float
+        - _target_: src.util.dynamic_load
+          item: src.util.data_transform_chbmit_filt  # Official EEGDM transform
+    - _target_: dataloader.TUEVDataset.TUEVDataField
+      _args_:
+        - "y"
+        - _target_: src.util.dynamic_load
+          item: torch.long
+  
+  batch_size: 16
+  num_workers: 4
